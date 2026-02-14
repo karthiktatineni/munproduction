@@ -21,7 +21,7 @@ services:
     image: nginx:alpine
     restart: always
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       # Uncomment below if you want to serve the frontend via Nginx as well
