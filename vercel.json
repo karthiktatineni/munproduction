@@ -3,7 +3,8 @@
     "rewrites": [
         {
             "source": "/api/admin/:path*",
-            "destination": "https://productionbackend-3sr4.onrender.com/api/admin/:path*"
+            "destination": "https://productionbackend-3sr4.onrender.com/api/admin/:path*",
+            "continue": true
         },
         {
             "source": "/api/:path*",
@@ -21,6 +22,10 @@
                 {
                     "key": "Cache-Control",
                     "value": "public, s-maxage=300, stale-while-revalidate=60"
+                },
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex"
                 }
             ]
         }
