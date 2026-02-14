@@ -1,5 +1,6 @@
 
-import { db, admin } from "../config/firebase.js";
+import { db } from "../config/firebase.js";
+import { collection, query, where, getDocs, updateDoc, doc, serverTimestamp } from "firebase/firestore";
 
 // Pricing Constants
 const PRICING = {
@@ -67,11 +68,13 @@ export const getPaymentDetails = async (req, res) => {
         if (!refId) return res.status(400).json({ error: "Missing refId" });
 
         let collectionName = "registrations";
-        let snapshot = await db.collection(collectionName).where("refId", "==", refId).get();
+        let q = query(collection(db, collectionName), where("refId", "==", refId.trim()));
+        let snapshot = await getDocs(q);
 
         if (snapshot.empty) {
             collectionName = "oc_registrations";
-            snapshot = await db.collection(collectionName).where("refId", "==", refId).get();
+            q = query(collection(db, collectionName), where("refId", "==", refId.trim()));
+            snapshot = await getDocs(q);
         }
 
         if (snapshot.empty) {
@@ -85,7 +88,12 @@ export const getPaymentDetails = async (req, res) => {
         const amount = calculateAmount(data, collectionName === "oc_registrations");
 
         // Update amountToPay if not set or different
-        await db.collection(collectionName).doc(id).update({ amountToPay: amount });
+        try {
+            await updateDoc(doc(db, collectionName, id), { amountToPay: amount });
+        } catch (err) {
+            console.error("Warning: Could not update amountToPay in Firestore:", err.message);
+            // Non-critical, continue
+        }
 
         res.json({
             success: true,
@@ -116,15 +124,17 @@ export const submitPayment = async (req, res) => {
         }
 
         // Check for duplicate UTR
-        const utrCheck1 = await db.collection("registrations").where("utr", "==", utr.trim()).get();
-        const utrCheck2 = await db.collection("oc_registrations").where("utr", "==", utr.trim()).get();
+        const utrCheck1 = await getDocs(query(collection(db, "registrations"), where("utr", "==", utr.trim())));
+        const utrCheck2 = await getDocs(query(collection(db, "oc_registrations"), where("utr", "==", utr.trim())));
 
         let collectionName = "registrations";
-        let snapshot = await db.collection(collectionName).where("refId", "==", refId).get();
+        let q = query(collection(db, collectionName), where("refId", "==", refId.trim()));
+        let snapshot = await getDocs(q);
 
         if (snapshot.empty) {
             collectionName = "oc_registrations";
-            snapshot = await db.collection(collectionName).where("refId", "==", refId).get();
+            q = query(collection(db, collectionName), where("refId", "==", refId.trim()));
+            snapshot = await getDocs(q);
         }
 
         if (snapshot.empty) {
@@ -140,9 +150,9 @@ export const submitPayment = async (req, res) => {
             return res.status(400).json({ error: "This UTR has already been used." });
         }
 
-        await db.collection(collectionName).doc(currentDocId).update({
+        await updateDoc(doc(db, collectionName, currentDocId), {
             utr: utr.trim(),
-            paidAt: admin.firestore.FieldValue.serverTimestamp(),
+            paidAt: serverTimestamp(),
         });
 
         syncToGoogleSheets(currentData, collectionName, utr.trim(), calculateAmount(currentData, collectionName === "oc_registrations"))

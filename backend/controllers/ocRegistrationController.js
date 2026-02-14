@@ -1,5 +1,6 @@
 
-import { db, admin } from "../config/firebase.js";
+import { db } from "../config/firebase.js";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export const registerOC = async (req, res) => {
     try {
@@ -15,11 +16,11 @@ export const registerOC = async (req, res) => {
 
         const refId = "MUNOC" + Date.now();
 
-        const docRef = await db.collection("oc_registrations").add({
+        const docRef = await addDoc(collection(db, "oc_registrations"), {
             ...data,
             registrationType: data.ocType,
             refId,
-            createdAt: admin.firestore.FieldValue.serverTimestamp()
+            createdAt: serverTimestamp()
         });
 
         res.status(201).json({
@@ -30,6 +31,6 @@ export const registerOC = async (req, res) => {
         });
     } catch (error) {
         console.error("Error registering OC:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: error.message || "Internal server error" });
     }
 };

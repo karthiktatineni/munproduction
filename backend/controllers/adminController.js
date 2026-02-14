@@ -1,9 +1,10 @@
 
 import { db } from "../config/firebase.js";
+import { collection, getDocs, doc, updateDoc, setDoc } from "firebase/firestore";
 
 export const getAdminData = async (req, res) => {
     try {
-        const querySnapshot = await db.collection("registrations").get();
+        const querySnapshot = await getDocs(collection(db, "registrations"));
         const delegateList = [];
 
         querySnapshot.forEach(docSnap => {
@@ -67,7 +68,7 @@ export const getAdminData = async (req, res) => {
             }
         });
 
-        const ocSnapshot = await db.collection("oc_registrations").get();
+        const ocSnapshot = await getDocs(collection(db, "oc_registrations"));
         const ocList = [];
         ocSnapshot.forEach(docSnap => {
             const data = docSnap.data();
@@ -97,7 +98,7 @@ export const getAdminData = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching admin data:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: error.message || "Internal server error" });
     }
 };
 
@@ -106,17 +107,17 @@ export const allocateDelegate = async (req, res) => {
         const { docId, members, allocation, matrix } = req.body;
 
         if (members) {
-            await db.collection("registrations").doc(docId).update({
+            await updateDoc(doc(db, "registrations", docId), {
                 members: members
             });
         } else if (allocation) {
-            await db.collection("registrations").doc(docId).update({
+            await updateDoc(doc(db, "registrations", docId), {
                 allocation: allocation
             });
         }
 
         if (matrix) {
-            await db.collection("public").doc("countryMatrix").set({
+            await setDoc(doc(db, "public", "countryMatrix"), {
                 matrix: matrix,
                 lastUpdated: new Date().toISOString()
             });
@@ -125,7 +126,7 @@ export const allocateDelegate = async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         console.error("Error allocating:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: error.message || "Internal server error" });
     }
 };
 
@@ -134,17 +135,17 @@ export const deallocateDelegate = async (req, res) => {
         const { docId, members, matrix } = req.body;
 
         if (members) {
-            await db.collection("registrations").doc(docId).update({
+            await updateDoc(doc(db, "registrations", docId), {
                 members: members
             });
         } else {
-            await db.collection("registrations").doc(docId).update({
+            await updateDoc(doc(db, "registrations", docId), {
                 allocation: null
             });
         }
 
         if (matrix) {
-            await db.collection("public").doc("countryMatrix").set({
+            await setDoc(doc(db, "public", "countryMatrix"), {
                 matrix: matrix,
                 lastUpdated: new Date().toISOString()
             });
@@ -153,7 +154,7 @@ export const deallocateDelegate = async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         console.error("Error deallocating:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: error.message || "Internal server error" });
     }
 };
 
@@ -163,13 +164,13 @@ export const verifyPayment = async (req, res) => {
         const collectionName = isOC ? "oc_registrations" : "registrations";
         if (!id) return res.status(400).json({ error: "Missing document ID" });
 
-        await db.collection(collectionName).doc(id).update({
+        await updateDoc(doc(db, collectionName, id), {
             verified: true
         });
 
         res.json({ success: true });
     } catch (error) {
         console.error("Error verifying:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: error.message || "Internal server error" });
     }
 };
