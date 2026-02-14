@@ -17,6 +17,9 @@ import ParticlesBackground from './components/ParticlesBackground';
 import './App.css';
 
 function App() {
+  // Debug Log
+  console.log("Current API URL:", import.meta.env.VITE_API_URL || "/api (fallback)");
+
   // Check for admin subdomain
   const isAdminSubdomain = window.location.hostname.startsWith("admin.");
 
