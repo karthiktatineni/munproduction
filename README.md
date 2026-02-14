@@ -1,9 +1,9 @@
 ﻿# IARE MUN 2026 - Official Registration & Management Platform
 
-
+![IARE MUN Banner](https://raw.githubusercontent.com/karthiktatineni/munproduction/main/public/logo.png)
 
 ## 📌 Project Overview
-The **IARE MUN 2026 Platform** is a enterprise-grade web application engineered for the **Institute of Aeronautical Engineering (IARE)** to manage their flagship Model United Nations conference. 
+The **IARE MUN 2026 Platform** is an enterprise-grade web application engineered for the **Institute of Aeronautical Engineering (IARE)** to manage their flagship Model United Nations conference. 
 
 This platform is built for **scale, security, and high availability**, featuring a decoupled micro-architecture that separates the high-performance React frontend from the Node.js backend cluster. It handles complex multi-country allocations, dynamic payment structures, and real-time administrative oversight.
 
@@ -21,10 +21,6 @@ Instead of direct client-to-backend communication, the project uses a **Reverse 
 To minimize database costs and maximize speed, the project implements two tiers of caching:
 *   **NGINX Proxy Cache**: GET requests to the Admin panel are cached at the edge for **5 minutes**. Repeated views of the dashboard load in milliseconds without hitting the backend.
 *   **Backend In-Memory Cache**: The Node.js server maintains a 30-second internal state of the registration data, significantly reducing Firestore "Document Read" counts during peak registration hours.
-
-### 3. **Smart Data Flow & Sync**
-*   **Firestore**: Real-time NoSQL database for the "Source of Truth."
-*   **Google Sheets Sync**: Every successfully submitted UTR (payment) is instantly mirrored to a centralized Google Sheet via SheetDB. This allows the non-technical Organizing Committee to monitor registrations without accessing the code or database.
 
 ---
 
@@ -52,24 +48,7 @@ To minimize database costs and maximize speed, the project implements two tiers 
 *   Docker Desktop
 *   Git
 
-### 1. Clone & Install
-```bash
-git clone https://github.com/karthiktatineni/munproduction.git
-cd munproduction
-npm install
-```
-
-### 2. Environment Setup
-Create a `.env` in the root folder with your Firebase and API keys:
-```env
-VITE_FIREBASE_API_KEY=your_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project
-VITE_SHEETS_API_URL=https://sheetdb.io/api/v1/your_id
-VITE_API_URL=/api
-```
-
-### 3. Launch the Production Stack
+### Launch the Production Stack
 To build and run the dual load balancers locally:
 ```bash
 docker-compose up --build -d
@@ -79,13 +58,10 @@ docker-compose up --build -d
 
 ---
 
-## � Deployment Guide
+## 🌐 Deployment Guide
 
 ### **Frontend (Vercel)**
 The `vercel.json` file is pre-configured to act as a cloud-based Load Balancer. It rewrites all `/api` calls to the Render backend cluster and manages edge caching for admin routes.
 
 ### **Backend (Render)**
 Deploy the `backend` folder as two separate "Web Service" instances. The NGINX configuration in this repository will automatically balance traffic between them using the provided URLs.
-
----
-

@@ -2,11 +2,6 @@
     "version": 2,
     "rewrites": [
         {
-            "source": "/api/admin/:path*",
-            "destination": "https://productionbackend-3sr4.onrender.com/api/admin/:path*",
-            "continue": true
-        },
-        {
             "source": "/api/:path*",
             "destination": "https://productionbackend-3sr4.onrender.com/api/:path*"
         },
