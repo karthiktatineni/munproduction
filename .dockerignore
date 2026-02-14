@@ -3,6 +3,6 @@ npm-debug.log
 dist
 .git
 .env
-Dockerfile
-docker-compose.yml
-nginx.conf
+# nginx.conf is needed by Dockerfile to build the production image
+# Dockerfile
+# docker-compose.yml

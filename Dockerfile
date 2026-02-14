@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-slim as build-stage
+FROM node:20-slim AS build-stage
 WORKDIR /app
 
 # Accept build arguments
@@ -24,7 +24,7 @@ ENV VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID
 ENV VITE_FIREBASE_MEASUREMENT_ID=$VITE_FIREBASE_MEASUREMENT_ID
 ENV VITE_SHEETS_API_URL=$VITE_SHEETS_API_URL
 
-# Delete any existing .env to ensure they don't override the build args
+# Delete any existing .env to ensure it doesn't override the build args
 RUN rm -f .env
 
 COPY package*.json ./
